@@ -3,6 +3,6 @@
 BASEDIR=$(readlink -f $(dirname $0))
 PROJDIR=$(dirname "$BASEDIR" )
 
-export PYTHONPATH=$PROJDIR/src:$PYTHONPATH
+export PYTHONPATH=$PROJDIR/src:$PROJDIR/src/pymir:$PYTHONPATH
 
 python $PROJDIR/src/linne/analyzer/tuner.py $1

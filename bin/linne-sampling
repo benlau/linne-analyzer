@@ -3,7 +3,7 @@
 BASEDIR=$(readlink -f $(dirname $0))
 PROJDIR=$(dirname "$BASEDIR" )
 
-export PYTHONPATH=$PROJDIR/src:$PYTHONPATH
+export PYTHONPATH=$PROJDIR/src:$PROJDIR/src/pymir:$PYTHONPATH
 
 if [ $# -ne 1 ]
 then
