@@ -1,0 +1,14 @@
+#!/bin/bash
+
+BASEDIR=$(readlink -f $(dirname $0))
+PROJDIR=$(dirname "$BASEDIR" )
+
+export PYTHONPATH=$PROJDIR/src:$PYTHONPATH
+
+if [ $# -ne 1 ]
+then
+    echo "Usage: linne-sampling wavfile"
+    exit 0
+fi
+
+python $PROJDIR/src/linne/analyzer/sampling/cmd.py $1

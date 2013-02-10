@@ -1,0 +1,3 @@
+[submodule "src/pymir"]
+	path = src/pymir
+	url = https://github.com/jsawruk/pymir.git
