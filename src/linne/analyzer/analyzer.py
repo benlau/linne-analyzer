@@ -28,11 +28,13 @@ class Word:
         
     def toLabel(self):
         ret = []
-        
-        ret.append([self.points[0],self.points[1],self.consonant] )
-        ret.append([self.points[1],self.points[2],u''.join(self.vowel)] )
-        ret.append([self.points[0],self.points[2],unicode(self)] )
-        
+        try:
+            ret.append([self.points[0],self.points[1],self.consonant] )
+            ret.append([self.points[1],self.points[2],u''.join(self.vowel)] )
+            ret.append([self.points[0],self.points[2],unicode(self)] )
+        except IndexError:
+            ret = []
+            
         return ret
 
 class Filter:
@@ -44,14 +46,18 @@ class Filter:
         self._soundTable = soundTable
         self._sampling = sampling
         
-        for word in words:
-            points = [] 
-            phonetics = [word.consonant , word.vowel[0] ]
-            for phonetic in phonetics:
-                points.append(self.search(phonetic)["Timestamp"])
-                
-            points.append(self.lowPass()["Timestamp"])
-            word.points = points          
+        try:
+            for word in words:
+                points = [] 
+                phonetics = [word.consonant , word.vowel[0] ]
+                for phonetic in phonetics:
+                    points.append(self.search(phonetic)["Timestamp"])
+                    
+                points.append(self.lowPass()["Timestamp"])
+                word.points = points
+        except IndexError:
+            print "Error! Unexcepted termination. Not all phonetic is found."
+		
 
     def search(self,phonetic):
         print "Searching %s..." % phonetic
