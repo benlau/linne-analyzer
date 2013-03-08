@@ -70,7 +70,7 @@ class Filter:
         
     def lowPass(self):
         # A low pass filter on RMS. A dirty hack for right-endpoint searching
-        while self._sampling[self._index]["RMS"] > 0.01:
+        while self._sampling[self._index]["RMS"] > 0.03:
             self._index = self._index+1
         frame = self._sampling[self._index]
         self._index = self._index + 1
