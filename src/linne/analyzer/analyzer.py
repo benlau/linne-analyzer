@@ -3,6 +3,7 @@ import re
 import csv
 import sys
 import codecs
+import traceback
 
 import numpy
 from linne.analyzer.sound import Table as SoundTable
@@ -25,6 +26,13 @@ class Word:
         
     def __str__(self):
         return unicode(self).encode("utf-8")
+
+    def toKeyList(self):
+        # Convert to a list of key phonetics of this word
+        ret = [self.consonant]
+        if len(self.vowel) > 0:
+            ret.append(self.vowel[0])
+        return ret
         
     def toLabel(self):
         ret = []
@@ -49,14 +57,21 @@ class Filter:
         try:
             for word in words:
                 points = [] 
-                phonetics = [word.consonant , word.vowel[0] ]
+                #phonetics = [word.consonant , word.vowel[0] ]
+                phonetics = word.toKeyList()
                 for phonetic in phonetics:
-                    points.append(self.search(phonetic)["Timestamp"])
+                    try:
+                        res = self.search(phonetic)["Timestamp"]
+                        points.append(res)
+                    except KeyError:
+                        print "[Error] %s is not existed in sound table(sound.csv)" %  phonetic
                     
                 points.append(self.lowPass()["Timestamp"])
                 word.points = points
         except IndexError:
-            print "Error! Unexcepted termination. Not all phonetic is found."
+            print "[Error] Unexpected termination. Not all phonetic is found."
+            #exc_type, exc_value, exc_traceback = sys.exc_info()
+            #traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
 		
 
     def search(self,phonetic):
