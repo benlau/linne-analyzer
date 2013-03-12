@@ -69,14 +69,21 @@ for dataset in datasetList:
 
 print "Calculate the new threshold value..."
 
+changed = False
+
 for key in stat:
     s = stat[key]
     old = s.threshold
     new = s.calc()
-    if old != new:
+
+    if str(old) != str(new):
         print "%s : %f -> %f" % (key , old,new)
         s.sound.threshold = s.threshold
-
-print "Saving to sound.csv..."
-table.save("sound.csv")
+        changed = True
+        
+if changed:
+    print "Saving to sound.csv..."
+    table.save("sound.csv")
+else:
+    print "Nothing Changed. Skip saving"
 print "Done"
