@@ -31,10 +31,10 @@ class Record:
         msg = ""
         if len(self.items) == 3:
             if (self.consonant[0] != self.phonetic[0]) or (self.vowel[1] != self.phonetic[1])  or (self.consonant[1] != self.vowel[0]):
-                msg = "Record of %s is not aligned!"
+                msg = "Record of %s is not aligned!" % self.phonetic[2]
                 ret = False
         elif len(self.items) != 1:
-            msg = "Invalid input size"
+            msg = "Invalid input size. Data : %s" % self.items 
             ret = False
         
         return (ret,msg)
@@ -44,15 +44,10 @@ class Record:
             return [float(p[0]) * 1000  , float(p[1])  * 1000 , p[2] ]
     
         if len(self.items) == 3:
-            (self.consonant ,self.vowel , self.phonetic)  = self.items
-            self.phonetic = adjust(self.phonetic)
-            self.vowel = adjust(self.vowel)
-            self.consonant = adjust(self.consonant)
-            
+            (self.consonant ,self.vowel , self.phonetic)  = [adjust(item) for item in self.items ]           
             self.data = [self.phonetic[2] , self.phonetic[0], self.consonant[0] - self.phonetic[0] , -(self.phonetic[1] - self.phonetic[0]) ,0,0] 
         else:
-            self.phonetic  = self.items[-1]
-            self.phonetic = adjust(self.phonetic)
+            self.phonetic  = adjust(self.items[-1])
             self.data = [self.phonetic[2] , self.phonetic[0], 0 , self.phonetic[1] - self.phonetic[0],0,0] 
 
 
