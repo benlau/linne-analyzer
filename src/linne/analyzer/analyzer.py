@@ -36,12 +36,12 @@ class Word:
         
     def toLabel(self):
         ret = []
-        try:
+        if len(self.vowel) == 0:
             ret.append([self.points[0],self.points[1],self.consonant] )
-            ret.append([self.points[1],self.points[2],u''.join(self.vowel)] )
+        else:
+            ret.append([self.points[0],self.points[1],"[" + self.consonant + "]"] )
+            ret.append([self.points[1],self.points[2],"[" + u''.join(self.vowel)+ "]"] )
             ret.append([self.points[0],self.points[2],unicode(self)] )
-        except IndexError:
-            pass
             
         return ret
 
