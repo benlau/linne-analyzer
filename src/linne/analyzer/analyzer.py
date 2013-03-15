@@ -10,48 +10,47 @@ from linne.analyzer.sound import Table as SoundTable
 from linne.analyzer.sound import Sound
 from linne.analyzer.sampling import SamplingFile
 from linne.analyzer.audacity import LabelFile
-from linne.analyzer.zhuyin import Phonetic as Word
+from linne.analyzer.zhuyin import Phonetic
 
 class Filter:
     def __init__(self):
         self._index = 0
       
-    def process(self,soundTable,sampling,words):
+    def process(self,soundTable,sampling,phonetics):
         self._index = 0
         self._soundTable = soundTable
         self._sampling = sampling
         
         try:
-            for word in words:
+            for phonetic in phonetics:
                 points = [] 
-                #phonetics = [word.consonant , word.vowel[0] ]
-                phonetics = word.toKeyList()
-                for phonetic in phonetics:
+                cv = phonetic.breakdown()
+                for p in cv:
                     try:
-                        res = self.search(phonetic)["Timestamp"]
+                        res = self.search(p)["Timestamp"]
                         points.append(res)
                     except KeyError:
                         print "[Error] %s is not existed in sound table(sound.csv)" %  phonetic
                     
-                points.append(self.lowPass()["Timestamp"])
-                word.points = points
+                points.append(self.highPass()["Timestamp"])
+                phonetic.points = points
         except IndexError:
             print "[Error] Unexpected termination. Not all phonetic is found."
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
 		
 
-    def search(self,phonetic):
-        print "Searching %s..." % phonetic
-        s = self._soundTable[phonetic]
+    def search(self,symbol):
+        print "Searching %s..." % symbol
+        s = self._soundTable[symbol]
         while not s.passThreshold(self._sampling[self._index]):
             self._index = self._index+1
         frame = self._sampling[self._index]
         self._index = self._index + 1
         return frame
         
-    def lowPass(self):
-        # A low pass filter on RMS. A dirty hack for right-endpoint searching
+    def highPass(self):
+        # A high pass filter on RMS. A dirty hack for right-endpoint searching
         while self._sampling[self._index]["RMS"] > 0.03:
             self._index = self._index+1
         frame = self._sampling[self._index]
@@ -79,15 +78,15 @@ print "Reading %s..." % filename
 
 f = codecs.open(filename,"r","utf-8")
 line = f.readline()
-words = [ Word(item.strip()) for item in line.split(" ") ]
+phonetics = [ Phonetic(item.strip()) for item in line.split(" ") ]
 
 filter = Filter()
-filter.process(table,samplingFile,words)
+filter.process(table,samplingFile,phonetics)
 
 labelFile = LabelFile()
 
-for word in words:
-    for row in word.toLabel():
+for p in phonetics:
+    for row in p.toLabel():
         labelFile.append(row)
 
 filename = target + "-label.txt"
