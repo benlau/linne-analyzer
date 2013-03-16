@@ -3,9 +3,10 @@ import re
 import codecs
 
 from linne.analyzer.audacity import LabelFile
+from linne.analyzer.zhuyin import Phonetic
 
 class Record:
-    # A helper to process a record in oto.ini by reading the 
+    # A helper class to process a record in oto.ini by reading the 
     # data from label file
     def __init__(self):
     
@@ -50,19 +51,28 @@ class Record:
             self.phonetic  = adjust(self.items[-1])
             self.data = [self.phonetic[2] , self.phonetic[0], 0 , self.phonetic[1] - self.phonetic[0],0,0] 
 
+def process(phoneticFile,labelFile):
+        format="%s=%s,%d,%d,%d,%d,%d\n"
+        wav = labelFile.replace("-label.txt",".wav")
 
-def processLabelFile(filename):
-    file = LabelFile()
-    file.open(filename)
-    wav = filename.replace("-label.txt",".wav")
-    format="%s=%s,%d,%d,%d,%d,%d\n"
-    record = Record()
-    for row in file:
-        record.append(row)
-        if record.finished:
-            t = [wav,] + record.data
+        print "Reading %s..." % phoneticFile
+        f = codecs.open(phoneticFile,"r","utf-8")
+        line = f.readline()
+        phonetics = [ Phonetic(item.strip()) for item in line.split(" ") ]       
+        
+        f = LabelFile()
+        f.open(labelFile)
+
+        iterator = iter(f)
+        
+        for p in phonetics:
             record = Record()
+            while not record.finished:
+                row = iterator.next()
+                record.append(row)
+            t = [wav,] + record.data
             oto.write(format % tuple(t))
+         
 
 oto = codecs.open("oto.ini","w","utf-8")
 
@@ -70,12 +80,10 @@ oto = codecs.open("oto.ini","w","utf-8")
 cwd = os.getcwd()
 files = os.listdir(cwd)
 
-
-
 for f in files:
     filename , ext = os.path.splitext(f)
     if re.match(".*-label\.txt$",f):
-        print "Reading %s..." % filename
-        processLabelFile(f)
+        input = f.replace("-label.txt",".txt")
+        process(input,f)
         
 print "Result is written to oto.ini"
