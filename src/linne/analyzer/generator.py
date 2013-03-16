@@ -97,6 +97,7 @@ def process(phoneticFile,labelFile):
         line = f.readline()
         phonetics = [ Phonetic(item.strip()) for item in line.split(" ") ]       
         
+        print "Reading %s..." % labelFile
         f = LabelFile()
         f.open(labelFile)
 
