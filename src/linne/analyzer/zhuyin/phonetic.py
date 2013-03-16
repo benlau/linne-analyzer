@@ -31,6 +31,21 @@ class Phonetic:
     def __str__(self):
         return unicode(self).encode("utf-8")
 
+    def isMono(self):
+        """TRUE if the phonetic only contains consonant or vowel"""
+        return self.consonant == u''        
+    
+    def hasConsonant(self):
+        return len(self.consonant) > 0
+        
+    def isConsonant(self,symbol):
+        """TRUE if the symbol is a consonant of this phonetic"""
+        return self.consonant == symbol
+
+    def isVowel(self,symbol):
+        """TRUE if the symbol is a consonant of this phonetic"""
+        return u''.join(self.vowel) == symbol
+
     def breakdown(self):
         """ Break down into a list of consonant and/or vowel symbols
         

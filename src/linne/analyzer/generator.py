@@ -5,34 +5,59 @@ import codecs
 from linne.analyzer.audacity import LabelFile
 from linne.analyzer.zhuyin import Phonetic
 
+class Label:
+    def __init__(self):
+        pass
+
 class Record:
     # A helper class to process a record in oto.ini by reading the 
     # data from label file
-    def __init__(self):
+    def __init__(self,phonetic):
     
-        self.consonant = None
-        self.vowel = None
-        self.phonetic = None
+        self.label = Label()
+        self.label.consonant = None
+        self.label.vowel = None
+        self.label.phonetic = None
+        self.phonetic = phonetic
         self.items = []
         self.finished = False
         self.data = []
         
     def append(self,data):
+        """ Append a label record.
+        """
+        def adjust(p):
+            # Convert to ms
+            return [float(p[0]) * 1000  , float(p[1])  * 1000 , p[2] ]
+
+        data = adjust(data)
+        symbol = re.sub("[\[\]]","",data[2])
+        if unicode(self.phonetic) == symbol:
+            self.label.phonetic = data
+        elif self.phonetic.isConsonant(symbol):
+            self.label.consonant = data
+        elif self.phonetic.isVowel(symbol):
+            self.label.vowel = data
+        else:
+            raise RuntimeError('A symbol is not existed. Corrupted data?')
+            
         self.items.append(data)
-        if not re.match("\[.*\]",data[2]):
+        if ( self.phonetic.isMono() 
+            or len(self.items) == 3 ):
             self._setup()
             (ret , msg) = self.validate()
             if not ret:
-                print "[Error] " + msg
+                print "[Warning] " + msg
             self.finished = True
-                
 
     def validate(self):
         ret = True
         msg = ""
         if len(self.items) == 3:
-            if (self.consonant[0] != self.phonetic[0]) or (self.vowel[1] != self.phonetic[1])  or (self.consonant[1] != self.vowel[0]):
-                msg = "Record of %s is not aligned!" % self.phonetic[2]
+            if ((self.label.consonant[0] != self.label.phonetic[0]) or 
+                (self.label.vowel[1] != self.label.phonetic[1])  or 
+                (self.label.consonant[1] != self.label.vowel[0])):
+                msg = "Record of %s is not aligned!" % self.label.phonetic[2]
                 ret = False
         elif len(self.items) != 1:
             msg = "Invalid input size. Data : %s" % self.items 
@@ -41,15 +66,27 @@ class Record:
         return (ret,msg)
 
     def _setup(self):
-        def adjust(p):
-            return [float(p[0]) * 1000  , float(p[1])  * 1000 , p[2] ]
     
         if len(self.items) == 3:
-            (self.consonant ,self.vowel , self.phonetic)  = [adjust(item) for item in self.items ]           
-            self.data = [self.phonetic[2] , self.phonetic[0], self.consonant[0] - self.phonetic[0] , -(self.phonetic[1] - self.phonetic[0]) ,0,0] 
+            self.data = [self.label.phonetic[2] , 
+                          self.label.phonetic[0], 
+                          self.label.consonant[1] - self.label.phonetic[0] , 
+                          -(self.label.phonetic[1] - self.label.phonetic[0]) ,
+                          0,0] 
         else:
-            self.phonetic  = adjust(self.items[-1])
-            self.data = [self.phonetic[2] , self.phonetic[0], 0 , self.phonetic[1] - self.phonetic[0],0,0] 
+            # Mono
+            if self.phonetic.hasConsonant():
+                consonant = self.label.phonetic[1] - self.label.phonetic[0]
+                vowel = 0
+            else:
+                consonant = 0
+                vowel = -(self.label.phonetic[1] - self.label.phonetic[0])
+            
+            self.data = [self.label.phonetic[2] , 
+                          self.label.phonetic[0], 
+                          consonant , 
+                          vowel,
+                          0,0] 
 
 def process(phoneticFile,labelFile):
         format="%s=%s,%d,%d,%d,%d,%d\n"
@@ -66,7 +103,7 @@ def process(phoneticFile,labelFile):
         iterator = iter(f)
         
         for p in phonetics:
-            record = Record()
+            record = Record(p)
             while not record.finished:
                 row = iterator.next()
                 record.append(row)
