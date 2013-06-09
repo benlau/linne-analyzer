@@ -19,7 +19,7 @@ class Phonetic:
             self.consonant = symbol[0]
             self.vowel = symbol[1:len(symbol)]
 
-        self.points = []
+        self.points = [] # The starting and end point of the symbol in audio track
         
     def __unicode__(self):
         ret = u''
@@ -45,6 +45,18 @@ class Phonetic:
     def isVowel(self,symbol):
         """TRUE if the symbol is a consonant of this phonetic"""
         return u''.join(self.vowel) == symbol
+        
+    def last(self):
+        """ Return the last symbol of this phonetic.
+        (experimental API)
+        """
+        ret = u''
+        if self.vowel:
+            ret = self.vowel[len(self.vowel) - 1]
+        elif self.consonant:
+            ret = self.consonant
+
+        return ret
 
     def breakdown(self):
         """ Break down into a list of consonant and/or vowel symbols

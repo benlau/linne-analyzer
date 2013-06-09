@@ -10,15 +10,28 @@ class Label:
         pass
 
 class Record:
-    # A helper class to process a record in oto.ini by reading the 
-    # data from label file
-    def __init__(self,phonetic):
+    """ A helper class to process a record in oto.ini by reading the 
+     data from label file.
+    
+     Since a record in oto.ini require multiple line information 
+     from label file. It will keep reading from the label file ,
+     once the information is enough , the "finished" flag 
+     will be set.
+     
+     Args:
+        phonetic: A Phonetic class instance
+        lastSymbol: The last symbol in previous record
+
+     
+     """
+    def __init__(self,phonetic,lastSymbol):
     
         self.label = Label()
         self.label.consonant = None
         self.label.vowel = None
         self.label.phonetic = None
         self.phonetic = phonetic
+        self.lastSymbol = lastSymbol
         self.items = []
         self.finished = False
         self.data = []
@@ -44,7 +57,7 @@ class Record:
         self.items.append(data)
         if ( self.phonetic.isMono() 
             or len(self.items) == 3 ):
-            self._setup()
+            self._process()
             (ret , msg) = self.validate()
             if not ret:
                 print "[Warning] " + msg
@@ -63,12 +76,22 @@ class Record:
             msg = "Invalid input size. Data : %s" % self.items 
             ret = False
         
-        return (ret,msg)
+        return (ret,msg)       
 
-    def _setup(self):
-    
+    def _name(self,name):
+        """ Re-format the "name" of the record. 
+        """
+        ret = name
+        if self.lastSymbol != u"":
+            ret = "%s %s" % (self.lastSymbol , name)
+        return ret
+
+    def _process(self):
+        """
+        Process the input items and write the result to "data"
+        """
         if len(self.items) == 3:
-            self.data = [self.label.phonetic[2] , 
+            self.data = [self._name(self.label.phonetic[2]) , 
                           self.label.phonetic[0], 
                           self.label.consonant[1] - self.label.phonetic[0] , 
                           -(self.label.phonetic[1] - self.label.phonetic[0]) ,
@@ -82,7 +105,7 @@ class Record:
                 consonant = 0
                 vowel = -(self.label.phonetic[1] - self.label.phonetic[0])
             
-            self.data = [self.label.phonetic[2] , 
+            self.data = [self._name(self.label.phonetic[2]) , 
                           self.label.phonetic[0], 
                           consonant , 
                           vowel,
@@ -96,19 +119,22 @@ def process(phoneticFile,labelFile):
         f = codecs.open(phoneticFile,"r","utf-8")
         line = f.readline()
         phonetics = [ Phonetic(item.strip()) for item in line.split(" ") ]       
-        
+
         print "Reading %s..." % labelFile
         f = LabelFile()
         f.open(labelFile)
 
         iterator = iter(f)
+        lastSymbol = u""
         
         for p in phonetics:
-            record = Record(p)
+            record = Record(p,lastSymbol)
             while not record.finished:
                 row = iterator.next()
                 record.append(row)
             t = [wav,] + record.data
+
+            lastSymbol = p.last()
             oto.write(format % tuple(t))
          
 
