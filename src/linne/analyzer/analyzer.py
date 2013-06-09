@@ -36,6 +36,12 @@ class Filter:
                 phonetic.points = points
         except IndexError:
             print "[Error] Unexpected termination. Not all phonetic is found."
+            
+            # When this exception happen , it means that analyzer can not 
+            # found all the phonetic listed in the input file (.txt).
+            
+            # It should adjust the sound.csv according to the output
+            
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
 		
