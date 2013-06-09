@@ -112,7 +112,7 @@ def process(phoneticFile,labelFile):
             oto.write(format % tuple(t))
          
 
-oto = codecs.open("oto.ini","w","utf-8")
+oto = codecs.open("oto.ini","w","utf-16")
 
 
 cwd = os.getcwd()
