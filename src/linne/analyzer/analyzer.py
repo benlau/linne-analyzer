@@ -41,7 +41,7 @@ class Filter:
             # found all the phonetic listed in the input file (.txt).
             
             # It should adjust the sound.csv according to the output
-            
+                        
             #exc_type, exc_value, exc_traceback = sys.exc_info()
             #traceback.print_tb(exc_traceback, limit=1, file=sys.stdout)
 		
@@ -91,10 +91,16 @@ filter.process(table,samplingFile,phonetics)
 
 labelFile = LabelFile()
 
-for p in phonetics:
-    for row in p.toLabel():
-        labelFile.append(row)
 
+for p in phonetics:
+    try:
+        labels = p.toLabel()
+        for row in labels:
+            labelFile.append(row)
+    except IndexError:
+        print u"[Error] The detection of %s is incomplete. The rest of phonentic will be skipped in output" % p
+        break
+        
 filename = target + "-label.txt"
 print "Writing to %s..." % filename
     
