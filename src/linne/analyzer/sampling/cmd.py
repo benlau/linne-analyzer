@@ -21,14 +21,17 @@ def writeCsv(sampling,frames,output):
     writer.writerow(["Timestamp",
                        "ZCR",
                        "Spectrum Variance",
-                       "RMS"]);
+                       "RMS",
+                       "STE"]);
 
     for i  in xrange(0,len(frames)):
+        windowSize = len(frames[i]) - 1
         timestamp = "%0.3f" % (sampling[i] / float(freq))
         row = [timestamp,
                frames[i].zcr(),
                frames[i].spectrum().variance(),
-               frames[i].rms()];
+               frames[i].rms(),
+               frames[i].energy(windowSize)[0]];
         writer.writerow(row);
 
     print "The result is written on %s" % output
