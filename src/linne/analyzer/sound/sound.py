@@ -16,5 +16,7 @@ class Sound:
             ret = frame["Spectrum Variance"] > self.threshold
         elif self.filter == "ZCR":
             ret = frame["ZCR"] > self.threshold
+        elif self.filter == "STE":
+            ret = frame["STE"] > self.threshold
         
         return ret

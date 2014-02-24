@@ -51,6 +51,7 @@ class Dataset:
             sample.zcr = float(record["ZCR"])
             sample.variance = float(record["Spectrum Variance"])
             sample.rms = float(record["RMS"])
+            sample.str = float(record["STE"])
             
             self._phoneticList.append(sample)
             
