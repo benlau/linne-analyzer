@@ -1,0 +1,23 @@
+language : python
+python:
+    - "2.7"
+before_install:
+    - sudo apt-get install python-scipy python-matplotlib python-pyaudio python-tk tk-dev
+script:
+    - export PYTHONPATH="/usr/lib/python2.7:/usr/lib/pymodules/python2.7:/usr/lib/python2.7/lib-tk:/usr/lib/python2.7/dist-packages:/usr/share/pyshared:/home/travis/virtualenv/python2.7/local/lib/python2.7/site-packages"
+    - export LD_LIBRARY_PATH=/usr/lib/python2.7/lib-dynload
+    - ls /home/travis/virtualenv/python2.7/local/lib/python2.7/site-packages
+    - ls /usr/lib/pymodules/python2.7
+    - source start.env
+    - mkdir -p tests
+    - cd tests
+    - git clone https://dl.dropboxusercontent.com/u/2152786/src/linne-data
+    - cd linne-data/sample/1
+    - ls
+    - linne-sampling v01.wav
+    - tail -n 10 v01-sampling.csv
+    - linne-analyzer v01
+    - cat v01-label.txt
+    - linne-tuner
+    - linne-generator
+    - cat oto.init
