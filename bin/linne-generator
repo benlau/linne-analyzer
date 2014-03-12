@@ -6,4 +6,4 @@ PROJDIR=$(dirname "$BASEDIR" )
 
 export PYTHONPATH=$PROJDIR/src:$PROJDIR/src/pymir:$PYTHONPATH
 
-python "$PROJDIR/src/linne/analyzer/generator.py" $1
+python "$PROJDIR/src/linne/analyzer/cmd/generator.py" $1
