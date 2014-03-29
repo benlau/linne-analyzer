@@ -3,7 +3,7 @@ import re
 import codecs
 
 from linne.analyzer.audacity import LabelFile
-from linne.analyzer.zhuyin import Phonetic
+from linne.analyzer.phonetic import Ipa
 
 class Label:
     def __init__(self):
@@ -118,7 +118,7 @@ def process(phoneticFile,labelFile):
         print "Reading %s..." % phoneticFile
         f = codecs.open(phoneticFile,"r","utf-8")
         line = f.readline()
-        phonetics = [ Phonetic(item.strip()) for item in line.split(" ") ]       
+        phonetics = [ Ipa(item.strip()) for item in line.split(" ") ]       
 
         print "Reading %s..." % labelFile
         f = LabelFile()
