@@ -10,7 +10,7 @@ from linne.analyzer.sound import Table as SoundTable
 from linne.analyzer.sound import Sound
 from linne.analyzer.sampling import SamplingFile
 from linne.analyzer.audacity import LabelFile
-from linne.analyzer.zhuyin import Phonetic
+from linne.analyzer.phonetic import Ipa
 
 class Filter:
     def __init__(self):
@@ -84,7 +84,7 @@ print "Reading %s..." % filename
 
 f = codecs.open(filename,"r","utf-8")
 line = f.readline()
-phonetics = [ Phonetic(item.strip()) for item in line.split(" ") ]
+phonetics = [ Ipa(item.strip()) for item in line.split(" ") ]
 
 filter = Filter()
 filter.process(table,samplingFile,phonetics)
