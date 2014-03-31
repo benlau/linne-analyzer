@@ -47,7 +47,7 @@ class Ipa:
         return unicode(self).encode("utf-8")
         
     def __len__(self):
-        return len(self.points)
+        return len(self.symbols)
 
     def isMono(self):
         """TRUE if the phonetic only contains consonant or vowel"""
@@ -67,6 +67,8 @@ class Ipa:
     def last(self):
         """ Return the last symbol of this phonetic.
         (experimental API)
+        
+        For oto generation
         """
         ret = u''
         if self.vowel:
