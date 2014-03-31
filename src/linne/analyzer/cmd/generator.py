@@ -9,6 +9,32 @@ class Label:
     def __init__(self):
         pass
 
+class LabelFinder:
+    """ Perform a column based string matching from label list"
+    """
+    def __init__(self,pattern):
+        self.pattern = pattern
+        self.target = ""
+        
+    def match(self,record):
+        self.target = self.target + record[2]
+        if not self.pattern.startswith(self.target):
+            raise RuntimeError('The symbol do not match. Corrupted data?')
+        if self.pattern == self.target:
+            return True
+        return False
+
+    def find(self,data,start):
+        i = start
+        while True:
+            self.target = self.target + data[i][2]
+            if not self.pattern.startswith(self.target):
+                msg = u'Searching for %s but it found %s. Corrupted data?' % (self.pattern,self.target)
+                raise RuntimeError(msg)
+            if self.pattern == self.target:
+                return (start,i+1)
+            i = i + 1
+
 class Record:
     """ A helper class to process a record in oto.ini by reading the 
      data from label file.
@@ -32,12 +58,63 @@ class Record:
         self.label.phonetic = None
         self.phonetic = phonetic
         self.lastSymbol = lastSymbol
-        self.items = []
-        self.finished = False
+        #self.items = []
+        #self.finished = False
         self.data = []
         
+    def read(self,labels,index):
+        """ Read from label file to complete the record
+        @param labels: List of label record
+        """
+        phonetic = u""
+        data = []
+        
+        finder = LabelFinder(unicode(self.phonetic))
+        (s,e) = finder.find(labels,index)
+        data = labels[0:e]
+
+        if not self.validateInputLabels(data):
+            raise RuntimeError("Invalid data")
+
+        self.label.phonetic = (data[0][0] , data[len(data) - 1][1], phonetic) 
+            
+        p = range(0,len(data))
+        vowel = 0
+        if self.phonetic.hasConsonant():
+            finder = LabelFinder(self.phonetic.consonant)
+            (s,e) = finder.find(data,0)
+            self.label.consonant = (data[s][0] , data[e-1][1],self.phonetic.consonant)
+            vowel = e
+        
+        finder = LabelFinder(self.phonetic.vowel)
+        (s,e) = finder.find(data,vowel)
+        self.label.vowel = (data[s][0] , data[e-1][1],self.phonetic.vowel)
+        self._process()
+                
+        
+    def validateInputLabels(self,data):
+        """
+        Validate the label
+        """
+        
+        phonetic = u''.join([row[2] for row in data])
+        if phonetic != unicode(self.phonetic):
+            return False
+        
+        for i in range(0,len(data) - 1):
+            if data[i][0] >= data[i][1]:
+                print "Invalid record : ", data
+                return False
+            if data[i][1] != data[i+1][0]:
+                print "Invalid record : ", data
+                return False
+        
+        return True
+        
+        
     def append(self,data):
-        """ Append a label record.
+        """ Append a label record
+        @deprecated
         """
         def adjust(p):
             # Convert to ms
@@ -64,6 +141,9 @@ class Record:
             self.finished = True
 
     def validate(self):
+        """
+        @deprecated
+        """
         ret = True
         msg = ""
         if len(self.items) == 3:
@@ -90,7 +170,8 @@ class Record:
         """
         Process the input items and write the result to "data"
         """
-        if len(self.items) == 3:
+        #if len(self.items) == 3:
+        if self.label.consonant != None and self.label.vowel != None:
             self.data = [self._name(self.label.phonetic[2]) , 
                           self.label.phonetic[0], 
                           self.label.consonant[1] - self.label.phonetic[0] , 
@@ -111,6 +192,11 @@ class Record:
                           vowel,
                           0,0] 
 
+def adjustLabel(p):
+    # Convert label record to be based on ms
+    return [float(p[0]) * 1000  , float(p[1])  * 1000 , p[2] ]
+
+
 def process(phoneticFile,labelFile):
         format="%s=%s,%d,%d,%d,%d,%d\n"
         wav = labelFile.replace("-label.txt",".wav")
@@ -123,17 +209,21 @@ def process(phoneticFile,labelFile):
         print "Reading %s..." % labelFile
         f = LabelFile()
         f.open(labelFile)
-
-        iterator = iter(f)
-        lastSymbol = u""
         
-        for p in phonetics:
-            record = Record(p,lastSymbol)
-            while not record.finished:
-                row = iterator.next()
-                record.append(row)
-            t = [wav,] + record.data
+        labels = [adjustLabel(l) for l in f] 
+        i = 0
+        lastSymbol = u""
 
+        for p in phonetics:
+            print "Processing %s..." % unicode(p)
+            record = Record(p,lastSymbol)
+            record.read(labels,i)
+            i = i + len(p)
+#            while not record.finished:
+#                row = iterator.next()
+#                record.append(row)
+            t = [wav,] + record.data
+            
             lastSymbol = p.last()
             oto.write(format % tuple(t))
          
@@ -144,10 +234,13 @@ oto = codecs.open("oto.ini","w","utf-16")
 cwd = os.getcwd()
 files = os.listdir(cwd)
 
-for f in files:
-    filename , ext = os.path.splitext(f)
-    if re.match(".*-label\.txt$",f):
-        input = f.replace("-label.txt",".txt")
-        process(input,f)
-        
-print "Result is written to oto.ini"
+try:
+    for f in files:
+        filename , ext = os.path.splitext(f)
+        if re.match(".*-label\.txt$",f):
+            input = f.replace("-label.txt",".txt")
+            process(input,f)
+            
+    print "Result is written to oto.ini"
+except RuntimeError,e:
+    print unicode(e.message).encode('utf-8')
