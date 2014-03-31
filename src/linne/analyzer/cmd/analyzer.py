@@ -30,7 +30,7 @@ class Filter:
                         res = self.search(p)["Timestamp"]
                         points.append(res)
                     except KeyError:
-                        print "[Error] %s is not existed in sound table(sound.csv)" %  phonetic
+                        print "[Error] %s is not existed in sound table(sound.csv)" %  p
                     
                 points.append(self.highPass()["Timestamp"])
                 phonetic.points = points

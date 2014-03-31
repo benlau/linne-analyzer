@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 class Ipa:
     """IPA Phonetic
@@ -7,15 +8,33 @@ class Ipa:
         """
         @type symbol: string
         @param symbol: The phonetic of a Chinese character formed by zhu yin symbol 
+        
+        >>> sys.getdefaultencoding()
+        'utf-8'
+        >>> len("ʂɑʊ".decode('utf-8'))
+        3
+        >>> p = Ipa('ʂɑʊ'.decode('utf-8'))
+        >>> unicode(p)
+        u'\u0282\u0251\u028a'
+        >>> len(p.consonant) # Based on the assumption from the discussion on 2014-03-15
+        2
+        >>> len(p.vowel)
+        1
+        >>> len(p.symbols)
+        3
+        >>> p.points  # The points for each phonetic symbol on the audio track
+        []
+        
         """
         if len(symbol) == 1:
             self.consonant = u''
-            self.vowel = symbol[0] # Mandarin don't have pronounce with only consonant
+            self.vowel = symbol[0] # Dirty hack for Mandarin as it don't have pronounce with only consonant
         else:
-            self.consonant = symbol[0]
-            self.vowel = symbol[1:len(symbol)]
+            self.consonant = symbol[0:len(symbol)-1]
+            self.vowel = symbol[len(symbol)-1]
+        self.symbols = [s for s in symbol]
 
-        self.points = [] # The starting and end point of the symbol in audio track
+        self.points = [] # The starting of the symbol in audio track. The last record should be the end point
         
     def __unicode__(self):
         ret = u''
@@ -26,6 +45,9 @@ class Ipa:
         
     def __str__(self):
         return unicode(self).encode("utf-8")
+        
+    def __len__(self):
+        return len(self.points)
 
     def isMono(self):
         """TRUE if the phonetic only contains consonant or vowel"""
@@ -55,25 +77,27 @@ class Ipa:
         return ret
 
     def breakdown(self):
-        """ Break down into a list of consonant and/or vowel symbols
+        """ Break down into a list of consonant and/or vowel symbols for analysis
         
         @rtype: list
         """
-        ret = []
-        if len(self.consonant) > 0:
-            ret.append(self.consonant)
-        if len(self.vowel) > 0:
-            ret.append(self.vowel[0])
+        ret = self.symbols
         return ret
-        
+
     def toLabel(self):
         """Convert to Audacity label format"""
         ret = []
-        if len(self.consonant) == 0:
-            ret.append([self.points[0],self.points[1],self.vowel] )
-        else:
-            ret.append([self.points[0],self.points[1],"[" + self.consonant + "]"] )
-            ret.append([self.points[1],self.points[2],"[" + u''.join(self.vowel)+ "]"] )
-            ret.append([self.points[0],self.points[2],unicode(self)] )
-            
+        i = 0
+        for i in range(0,len(self.symbols)):
+            record = [self.points[i],self.points[i+1],self.symbols[i]]
+            ret.append(record)
         return ret
+
+if __name__ == '__main__':
+    import sys
+    reload(sys)  # Reload does the trick!
+    sys.setdefaultencoding('utf-8')    
+    import doctest
+    doctest.testmod()
+    
+
