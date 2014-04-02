@@ -7,25 +7,37 @@ pngFile=[arg_list{1} ".png"]
 
 [y,fs] = wavread(wavFile);
 mono=y(:,1);
-subplot(4,1,1),plot(( 1:length(mono)) /fs, mono );
+subplot(6,1,1),plot(( 1:length(mono)) /fs, mono );
 title("Waveform");
 
 data = csvread(csvFile);
 timestamp = data(:,1);
 zcr = data(:,2);
 variance = data(:,3);
-ste = data(:,4);
+rms = data(:,4);
+ste = data(:,5);
+pitch = data(:,6);
+zcr_d = data(:,7);
+var_d = data(:,8);
+rms_d = data(:,9);
+ste_d = data(:,10);
 
 #subplot(2,1,2),plot(( 1:length(d)) / fs, d );
 
-subplot(4,1,2),plot(timestamp , zcr );
-title("ZCR");
+subplot(6,1,2),plot(timestamp , zcr );
+title("Zero-Cross Rate");
 
-subplot(4,1,3),plot( timestamp , variance );
+subplot(6,1,3),plot(timestamp , zcr_d );
+title("Zero-Cross Rate Diff.");
+
+subplot(6,1,4),plot( timestamp , variance );
 title("Spectrum Variance");
 
-subplot(4,1,4),plot( timestamp , ste );
-title("Short Time Energy");
+subplot(6,1,5),plot( timestamp , var_d );
+title("Spectrum Variance Diff.");
+
+subplot(6,1,6),plot( timestamp , pitch );
+title("Pitch Score");
 
 print(pngFile,"-dpng");
 
