@@ -4,6 +4,7 @@ csv format
 """
 
 from pymir import AudioFile
+from pymir import Pitch
 import math
 import csv
 import sys
@@ -22,17 +23,45 @@ def writeCsv(sampling,frames,output):
                        "ZCR",
                        "Spectrum Variance",
                        "RMS",
-                       "STE"]);
+                       "STE",
+                       "Pitch",
+                       "ZCR diff.",
+                       "Spec. Var. diff.",
+                       "RMS diff.",
+                       "STE diff."]);
+
+    prev_zcr = 0.;
+    prev_var = 0.;
+    prev_rms = 0.;
+    prev_ste = 0.;
 
     for i  in xrange(0,len(frames)):
         windowSize = len(frames[i]) - 1
         timestamp = "%0.3f" % (sampling[i] / float(freq))
+        chord, score = Pitch.getChord(frames[i].spectrum().chroma())
+
+        diff_zcr = frames[i].zcr() - prev_zcr;
+        diff_var = frames[i].spectrum().variance() - prev_var;
+        diff_rms = frames[i].rms() - prev_rms;
+        diff_ste = frames[i].energy(windowSize)[0] - prev_ste;
+
         row = [timestamp,
                frames[i].zcr(),
                frames[i].spectrum().variance(),
                frames[i].rms(),
-               frames[i].energy(windowSize)[0]];
+               frames[i].energy(windowSize)[0],
+               score,
+               diff_zcr,
+               diff_var,
+               diff_rms,
+               diff_ste];
         writer.writerow(row);
+
+        prev_zcr = frames[i].zcr();
+        prev_var = frames[i].spectrum().variance();
+        prev_rms = frames[i].rms();
+        prev_ste = frames[i].energy(windowSize)[0];
+
 
     print "The result is written on %s" % output
 
