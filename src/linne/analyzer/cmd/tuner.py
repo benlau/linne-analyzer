@@ -27,13 +27,20 @@ class Stat:
         self.threshold = numpy.average(numpy.array(self.data))
         return self.threshold
 
+changed = False # It will set to True if the result should be saved.
+
 table = SoundTable()
 
 # For collect the phonetic data from sampling file
 stat = {}
 
 print "Reading sound.csv..."
-table.open("sound.csv")
+try:
+    table.open("sound.csv")
+except IOError,e:
+    print "Warn: Fail to open %s. " % ("sound.csv")   
+    changed = True
+    
 print "%d of record(s) read." % len(table)
 
 for sound in table:
@@ -68,8 +75,6 @@ for dataset in datasetList:
         stat[sample.phonetic].read(sample)
 
 print "Calculate the new threshold value..."
-
-changed = False
 
 for key in stat:
     s = stat[key]

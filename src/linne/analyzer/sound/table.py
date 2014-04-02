@@ -61,6 +61,9 @@ class Table:
         f = open(filename,"wb")
         
         writer = csv.writer(f,csv.excel)
+        if self._header == None:
+            self._header = ["Phonetic","IPA","Filter","Threshold","Remarks"]
+        
         writer.writerow(self._header)
         for key in self._data:
             s = self._data[key]
