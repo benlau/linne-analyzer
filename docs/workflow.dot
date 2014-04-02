@@ -1,0 +1,38 @@
+digraph workflow {
+
+    "linne-sampling" [shape=box]
+    "linne-analyzer" [shape=box]
+    "linne-tuner" [shape=box]
+    "linne-generator" [shape=box]
+    "audacity" [shape=box]
+        
+    "data.txt" [shape=none]
+    "data-label.txt" [shape=none]
+    "data.wav" [shape=none]
+    "data-sampling.csv" [shape=none]
+
+    "oto.ini" [shape=ellipse]
+    "sound.csv" [shape=ellipse]
+        
+    "data.wav" -> "linne-sampling" -> "data-sampling.csv"
+
+    "data.txt" -> "linne-analyzer"
+    "sound.csv" -> "linne-analyzer"
+    "data-sampling.csv" -> "linne-analyzer"
+    
+    "linne-analyzer" -> "data-label.txt"
+
+    "data-label.txt" -> "linne-generator" -> "oto.ini"
+    
+
+    "data.txt" -> "linne-generator"    
+    
+    "data-label.txt" -> "linne-tuner"
+    "sound.csv" -> "linne-tuner" -> "sound.csv"
+    
+    "data-sampling.csv" -> "linne-tuner"
+    
+    
+    "data-label.txt" -> "audacity" -> "data-label.txt"
+
+}
