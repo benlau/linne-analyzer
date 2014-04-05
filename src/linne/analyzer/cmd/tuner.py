@@ -24,7 +24,8 @@ class Stat:
             
     def calc(self):
         # Calculate the new threshold value
-        self.threshold = numpy.average(numpy.array(self.data))
+        if len(self.data) > 0:
+            self.threshold = numpy.average(numpy.array(self.data))
         return self.threshold
 
 changed = False # It will set to True if the result should be saved.
