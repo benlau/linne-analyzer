@@ -70,10 +70,23 @@ for f in files:
 for dataset in datasetList:
     sampleList = dataset.phoneticList()
     for sample in sampleList:
-        if not stat.has_key(sample.phonetic):
+        phonetic = sample.phonetic
+        if not stat.has_key(phonetic):
             print "Warning! Phonetic not found in sound.csv: %s" % sample.phonetic
-            continue
-        stat[sample.phonetic].read(sample)
+            print "It will be added to sound.csv"
+            item = Stat()
+            item.sound = Sound(
+                phonetic = phonetic,
+                ipa = phonetic,
+                filter = "RMS", # Just the default value. It should not be used.
+                threshold = 0,
+                remarks = "Added by linne-tuner. Please update the filter type"
+            )
+            item.threshold = item.sound.threshold
+            stat[phonetic] = item
+            table.append(item.sound)
+            changed = True
+        stat[phonetic].read(sample)
 
 print "Calculate the new threshold value..."
 

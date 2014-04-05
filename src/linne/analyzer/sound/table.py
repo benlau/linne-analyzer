@@ -74,3 +74,6 @@ class Table:
                                s.remarks];
             row = [ unicode(x).encode("utf-8") for x in row]
             writer.writerow(row)
+            
+    def append(self,sound):
+        self._data[sound.phonetic] = sound
