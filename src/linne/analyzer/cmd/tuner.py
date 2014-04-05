@@ -20,6 +20,10 @@ class Stat:
             self.data.append(sample.rms)
         elif filter == "SV":
             self.data.append(sample.variance)
+        elif filter == "ZCR":
+            self.data.append(sample.zcr)
+        elif filter == "STE":
+            self.data.append(sample.ste)
         else:
             print "Unknown filter type : %s" % filter
             
