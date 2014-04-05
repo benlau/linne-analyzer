@@ -83,15 +83,20 @@ class Ipa:
         
         @rtype: list
         """
-        ret = self.symbols
+        ret = []
+        if len(self.consonant) > 0:
+            ret.append(self.consonant)
+        if len(self.vowel) > 0:
+            ret.append(self.vowel[0])
         return ret
-
+        
     def toLabel(self):
         """Convert to Audacity label format"""
         ret = []
-        i = 0
-        for i in range(0,len(self.symbols)):
-            record = [self.points[i],self.points[i+1],self.symbols[i]]
+        symbols = self.breakdown()
+        for i in range(0,len(symbols)):
+            print i
+            record = [self.points[i],self.points[i+1],symbols[i] ]
             ret.append(record)
         return ret
 
