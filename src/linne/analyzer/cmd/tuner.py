@@ -4,6 +4,7 @@ import re
 from linne.analyzer.sound import Table as SoundTable
 from linne.analyzer.sound import Sound
 from linne.analyzer.dataset import Dataset
+from linne.analyzer.phonetic import Ipa
 import numpy
 
 class Stat:
@@ -70,7 +71,7 @@ for f in files:
 for dataset in datasetList:
     sampleList = dataset.phoneticList()
     for sample in sampleList:
-        phonetic = sample.phonetic
+        phonetic = Ipa.simplifySymbol(sample.phonetic)
         if not stat.has_key(phonetic):
             print "Warning! Phonetic not found in sound.csv: %s" % sample.phonetic
             print "It will be added to sound.csv"
@@ -84,7 +85,7 @@ for dataset in datasetList:
             )
             item.threshold = item.sound.threshold
             stat[phonetic] = item
-            table.append(item.sound)
+            table[phonetic] = item.sound
             changed = True
         stat[phonetic].read(sample)
 

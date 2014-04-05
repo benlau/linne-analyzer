@@ -95,10 +95,16 @@ class Ipa:
         ret = []
         symbols = self.breakdown()
         for i in range(0,len(symbols)):
-            print i
             record = [self.points[i],self.points[i+1],symbols[i] ]
             ret.append(record)
         return ret
+
+    @staticmethod    
+    def simplifySymbol(symbol):
+        """ Simplify vowel or consonant for sound table for matching
+        """
+        return symbol[0]
+    
 
 if __name__ == '__main__':
     import sys
