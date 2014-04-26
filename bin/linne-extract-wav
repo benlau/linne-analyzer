@@ -1,0 +1,31 @@
+#!/usr/bin/octave -qf
+
+# Extract the column from sampling csv and convert to wav file
+# The result is used for waveform comparison by using audacity.
+# Therefore, the scalar has been adjusted to display in audacity.
+
+arg_list = argv();
+
+csvFile=[arg_list{1} "-sampling.csv"];
+
+disp(["Extracting " csvFile])
+
+data = csvread(csvFile);
+timestamp = data(:,1);
+zcr = data(:,2);
+variance = data(:,3);
+rms = data(:,4);
+ste = data(:,5);
+pitch = data(:,6);
+
+wavwrite(zcr,200,"ZCR.wav");
+disp("ZCR.wav saved")
+
+wavwrite(variance / max(variance),200,"SV.wav");
+disp("SV.wav saved")
+
+wavwrite(ste / max(ste),200,"STE.wav");
+disp("STE.wav saved")
+
+wavwrite(pitch / max(pitch),200,"PITCH.wav");
+disp("PITCH.wav saved")

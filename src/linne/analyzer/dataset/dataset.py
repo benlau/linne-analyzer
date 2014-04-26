@@ -1,6 +1,7 @@
 import csv
 from linne.analyzer.audacity import LabelFile
 from linne.analyzer.sampling import SamplingFile
+from linne.analyzer.phonetic import Ipa
 
 class Sample:
     def __init__(self):
@@ -45,7 +46,7 @@ class Dataset:
         for row in self._labelFile:
             sample = Sample()
             sample.timestamp = row[0]
-            sample.phonetic = row[2][0] # For ZhuYin only. 
+            sample.phonetic = Ipa.simplifySymbol(row[2])
             
             record = self._samplingFile.search(float(row[0]));
             sample.zcr = float(record["ZCR"])

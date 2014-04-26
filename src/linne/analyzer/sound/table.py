@@ -3,7 +3,7 @@
 import csv
 import codecs
 from sound import Sound
-
+from linne.analyzer.phonetic import Ipa
 
 class Iterator:
     def __init__(self,table):
@@ -32,10 +32,13 @@ class Table:
         return len(self._data)
         
     def __getitem__(self,key):
-        return self._data[key]
+        k =  Ipa.simplifySymbol(key)
+        
+        return self._data[k]
         
     def __setitem__(self,key,value):
-        self._data[key] = value
+        k =  Ipa.simplifySymbol(key)
+        self._data[k] = value
     
     def open(self,filename):
         f = open(filename,"rw")
@@ -61,6 +64,9 @@ class Table:
         f = open(filename,"wb")
         
         writer = csv.writer(f,csv.excel)
+        if self._header == None:
+            self._header = ["Phonetic","IPA","Filter","Threshold","Remarks"]
+        
         writer.writerow(self._header)
         for key in self._data:
             s = self._data[key]
@@ -71,3 +77,4 @@ class Table:
                                s.remarks];
             row = [ unicode(x).encode("utf-8") for x in row]
             writer.writerow(row)
+           

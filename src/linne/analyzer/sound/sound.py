@@ -1,12 +1,12 @@
 # Sound Data Type
 
 class Sound:
-    def __init__(self):
-        self.phonetic = None
-        self.ipa = None
-        self.filter = None
-        self.threshold = None
-        self.remarks = None 
+    def __init__(self,phonetic = None,ipa = None , filter = None,threshold = None,remarks = None):
+        self.phonetic = phonetic
+        self.ipa = ipa
+        self.filter = filter
+        self.threshold = threshold
+        self.remarks = remarks
 
     def passThreshold(self,frame):
         ret = False

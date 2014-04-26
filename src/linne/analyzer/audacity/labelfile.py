@@ -38,8 +38,15 @@ class LabelFile:
         self._file = open(file,"rw")
         reader = csv.reader(self._file,delimiter="\t")
         self._data = []
+        i = 0
         for row in reader:
             tmp = []
+            i = i + 1
+            if len(row) != 3:
+                line = [ x.decode("utf-8") for x in row] 
+                line = u" ".join(line)
+                print "%s:%i: Error. Invalid Format. Not using tab as separator? : %s" % (file,i,line)
+                continue
             for cell in row:
                 tmp.append(unicode(cell,"utf-8"))
             self._data.append(tmp)

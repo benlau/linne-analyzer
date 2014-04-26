@@ -4,6 +4,7 @@ import re
 from linne.analyzer.sound import Table as SoundTable
 from linne.analyzer.sound import Sound
 from linne.analyzer.dataset import Dataset
+from linne.analyzer.phonetic import Ipa
 import numpy
 
 class Stat:
@@ -19,13 +20,20 @@ class Stat:
             self.data.append(sample.rms)
         elif filter == "SV":
             self.data.append(sample.variance)
+        elif filter == "ZCR":
+            self.data.append(sample.zcr)
+        elif filter == "STE":
+            self.data.append(sample.ste)
         else:
             print "Unknown filter type : %s" % filter
             
     def calc(self):
         # Calculate the new threshold value
-        self.threshold = numpy.average(numpy.array(self.data))
+        if len(self.data) > 0:
+            self.threshold = numpy.average(numpy.array(self.data))
         return self.threshold
+
+changed = False # It will set to True if the result should be saved.
 
 table = SoundTable()
 
@@ -33,7 +41,12 @@ table = SoundTable()
 stat = {}
 
 print "Reading sound.csv..."
-table.open("sound.csv")
+try:
+    table.open("sound.csv")
+except IOError,e:
+    print "Warn: Fail to open %s. " % ("sound.csv")   
+    changed = True
+    
 print "%d of record(s) read." % len(table)
 
 for sound in table:
@@ -62,14 +75,25 @@ for f in files:
 for dataset in datasetList:
     sampleList = dataset.phoneticList()
     for sample in sampleList:
-        if not stat.has_key(sample.phonetic):
+        phonetic = Ipa.simplifySymbol(sample.phonetic)
+        if not stat.has_key(phonetic):
             print "Warning! Phonetic not found in sound.csv: %s" % sample.phonetic
-            continue
-        stat[sample.phonetic].read(sample)
+            print "It will be added to sound.csv"
+            item = Stat()
+            item.sound = Sound(
+                phonetic = phonetic,
+                ipa = phonetic,
+                filter = "RMS", # Just the default value. It should not be used.
+                threshold = 0,
+                remarks = "Added by linne-tuner. Please update the filter type"
+            )
+            item.threshold = item.sound.threshold
+            stat[phonetic] = item
+            table[phonetic] = item.sound
+            changed = True
+        stat[phonetic].read(sample)
 
 print "Calculate the new threshold value..."
-
-changed = False
 
 for key in stat:
     s = stat[key]
